@@ -9,6 +9,9 @@
 #include "led_7seg.h"
 
 /* Variables */
+uint8_t timer_flag[__MAX_TIM];
+uint32_t timer_counter[__MAX_TIM];
+
 uint8_t timer1_flag = 0;
 uint16_t timer1_counter = 0;
 uint16_t timer1_mul = 0;
@@ -64,8 +67,34 @@ void timer4_set(int ms) {
  * @note	This callback function is called by system
  * @retval 	None
  */
+void InitTimer(void){
+	for(int i = 0; i < __MAX_TIM; i++){
+		timer_counter[i] = 0;
+		timer_flag[i] = 0;
+	}
+}
+
+void set_timer(uint32_t ms, uint8_t idx){
+	timer_flag[idx] = 0;
+	timer_counter[idx] = ms;
+}
+
+void TimerRun(void){
+	for(int i = 0; i < __MAX_TIM; i++){
+		if(timer_counter[i] > 0){
+			timer_counter[i]--;
+			if(timer_counter[i] == 0){
+				timer_flag[i] = 1;
+			}
+		}
+	}
+}
+
+
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM2) {
+		TimerRun();
 		if (timer2_counter > 0) {
 			timer2_counter--;
 			if (timer2_counter == 0) {

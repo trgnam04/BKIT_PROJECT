@@ -122,37 +122,28 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	system_init();
   /* USER CODE END 2 */
-	InitSlave(&BKIT01);
 
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-//	InitSlave(&BKIT01);
+	InitSlave(&BKIT01);
+	InitTimer();
 	lcd_clear(BLACK);
-//	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,RESET);
-//	HAL_UARTEx_ReceiveToIdle_IT(&huart3, (void*)buf, 10);
+	set_timer(10, 0);
+	set_timer(1000, 1);
 
 
-//	HAL_UART_Transmit(&huart1, "hello\r\n", 7, 1000);
-//	if(timer1_flag){
-//		HAL_UART_Transmit(&huart1, BKIT01.Register, 10, 1000);
-//		timer1_flag = 0;
-//	}
 	while (1) {
-//		while(!timer2_flag)
-//			;
-//		timer2_flag = 0;
+		if(timer_flag[0]){
+			slave_behavior(&BKIT01);
+			TestADC();
+			set_timer(10, 0);
+		}
+		if(timer_flag[1]){
+			HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);
+			set_timer(1000, 1);
+		}
 
-		slave_behavior(&BKIT01);
-//		HAL_UART_Transmit(&huart3, (void*)"hello\r\n", 7, HAL_MAX_DELAY);
-//		if(Receive_Flag){
-//			Receive_Flag = 0;
-//			Read_multiple_holding_register_handler(&BKIT01);
-//		}
-
-		HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);
-		TestADC();
-		HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

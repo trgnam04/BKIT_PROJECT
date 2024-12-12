@@ -73,20 +73,15 @@ void splitUint16(uint16_t input, uint8_t *higherByte, uint8_t *lowerByte) {
 
 void Read_multiple_holding_register_handler(Slave_Device* hDev){
 	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], &hDev->Register[slave.Rx_buf[2]], slave.Rx_buf[3] * 2, 100);
-//	lcd_show_string(10, 10, "             ", RED, BLACK, 16, 0);
-//	lcd_show_string(10, 10, "read multiple", RED, BLACK, 16, 0);
 	return;
 }
 
 void Read_single_register_handler(Slave_Device* hDev){
-	/*chos nguyen*/
 	uint8_t data[3];
 	data[0] = 3;
 	data[1] = hDev->Register[slave.Rx_buf[2]];
 	data[2] = hDev->Register[slave.Rx_buf[2] + 1];
 	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], data, 3, 100);
-//	lcd_show_string(10, 10, "             ", RED, BLACK, 16, 0);
-//	lcd_show_string(10, 10, "read ", RED, BLACK, 16, 0);
 	return;
 }
 
