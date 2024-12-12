@@ -1,0 +1,6 @@
+../Core/Src/software_timer.c:30:6:timer2_init	1
+../Core/Src/software_timer.c:34:6:timer4_init	1
+../Core/Src/software_timer.c:43:6:timer1_set	1
+../Core/Src/software_timer.c:49:6:timer2_set	1
+../Core/Src/software_timer.c:55:6:timer4_set	1
+../Core/Src/software_timer.c:67:6:HAL_TIM_PeriodElapsedCallback	7
