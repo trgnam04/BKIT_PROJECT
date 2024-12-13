@@ -78,6 +78,9 @@ void TestADC();
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
+	Modbus_CallBack(&slave, huart, Size);
+}
 
 /* USER CODE END 0 */
 
@@ -123,15 +126,17 @@ int main(void)
 	system_init();
   /* USER CODE END 2 */
 
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	InitSlave(&BKIT01);
+	slave.Tx_buf[0] = 1;
+	slave.Tx_size = 1;
+	Modbus_Send(&slave);
 	InitTimer();
 	lcd_clear(BLACK);
 	set_timer(10, 0);
 	set_timer(1000, 1);
-	set_timer(10, 2);
+	set_timer(500, 2);
 
 
 	while (1) {

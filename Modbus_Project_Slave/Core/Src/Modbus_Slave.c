@@ -28,7 +28,7 @@ void CommandParser_handler(Slave_Device* hDev){
 		break;
 	}
 	case READ_HOLDING_REGISTER:{
-		hDev->signal = READ_SINGLE_REGISTER_HANDLER;
+		hDev->signal = READ_MULTIPLE_HOLDING_REGISTER_HANDLER;
 		break;
 	}
 	case READ_INPUT_REGISTER:{
@@ -67,7 +67,9 @@ void splitUint16(uint16_t input, uint8_t *higherByte, uint8_t *lowerByte) {
 
 
 void Read_multiple_holding_register_handler(Slave_Device* hDev){
-	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], &hDev->Register[slave.Rx_buf[2]], slave.Rx_buf[3] * 2, 100);
+	uint16_t startReg = (uint16_t)(slave.Rx_buf[2]) << 8 | (uint16_t)(slave.Rx_buf[3]);
+	uint16_t numberOfReg = (uint16_t)(slave.Rx_buf[4]) << 8 | (uint16_t)(slave.Rx_buf[5]);
+	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], &hDev->Register[startReg], numberOfReg * 2, 100);
 	return;
 }
 
@@ -109,6 +111,13 @@ void slave_behavior(Slave_Device* hDev){
 	}
 	case WAITTING_FOR_CMD:{
 		ReadData(hDev);
+//		HAL_UART_Transmit(&huart1, &hDev->Register, 10, 100);
+//		if(Receive_Flag){
+//			HAL_UART_Transmit(&huart1, (uint8_t*)"hehe", 4, 100);
+//		}else{
+//			HAL_UART_Transmit(&huart1, (uint8_t*)"0 hehe", 6, 100);
+//		}
+
 		if(Receive_Flag){
 			lcd_show_string(10, 10, "                      ", RED, BLACK, 16, 0);
 			lcd_show_string(10, 30, "valid cmd", RED, BLACK, 16, 0);
