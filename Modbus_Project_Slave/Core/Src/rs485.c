@@ -12,12 +12,14 @@ Modbus_HandleTypeDef slave;
 
 
 HAL_StatusTypeDef Modbus_Send(Modbus_HandleTypeDef* hModbus){
+	HAL_UART_Transmit(&huart1,hModbus->Tx_buf,hModbus->Tx_size,HAL_MAX_DELAY);
+
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,SET);
 	if(HAL_UART_Transmit(hModbus->huart,hModbus->Tx_buf,hModbus->Tx_size,HAL_MAX_DELAY) != HAL_OK){
 		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,RESET);
 		return HAL_ERROR;
 	};
-	HAL_UART_Transmit(&huart1,hModbus->Tx_buf,hModbus->Tx_size,HAL_MAX_DELAY);
+
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_15,RESET);
 	return HAL_OK;
 }
@@ -66,15 +68,16 @@ Modbus_Status Modbus_Transmit_Master(Modbus_HandleTypeDef* hModbus, uint8_t Addr
 Modbus_Status Modbus_Transmit_Slave(Modbus_HandleTypeDef* hModbus, uint8_t Address, uint8_t Function, uint8_t* Data, uint8_t Size, uint32_t Timeout){
 	hModbus->Tx_buf[0] = Address;
 	hModbus->Tx_buf[1] = Function;
+	hModbus->Tx_buf[2] = Size;
 	int i;
 	uint16_t crc = 0;
 	for(i=0; i<Size; i++){
-		hModbus->Tx_buf[i+2] = *(Data + i);
+		hModbus->Tx_buf[i+3] = *(Data + i);
 	}
-	crc = crc16(hModbus->Tx_buf, i+2);
-	hModbus->Tx_buf[i+2] = crc & 0x00FF; // LOW
-	hModbus->Tx_buf[i+3] = crc >> 8; //HIGH
-	hModbus->Tx_size = Size + 4;
+	crc = crc16(hModbus->Tx_buf, i+3);
+	hModbus->Tx_buf[i+3] = crc & 0x00FF; // LOW
+	hModbus->Tx_buf[i+4] = crc >> 8; //HIGH
+	hModbus->Tx_size = Size + 5;
 	if(Modbus_Send(hModbus) == HAL_OK){
 		return MODBUS_ERROR;
 	}
@@ -92,7 +95,7 @@ void Modbus_CallBack(Modbus_HandleTypeDef* hModbus, UART_HandleTypeDef* huart, u
 	hModbus->Rx_size = Size;
 	hModbus->RxFlag = 1;
 	Receive_Flag = Modbus_CheckData(hModbus);
-	HAL_UART_Transmit(&huart1, hModbus->Rx_buf, hModbus->Rx_size, HAL_MAX_DELAY);
+//	HAL_UART_Transmit(&huart1, hModbus->Rx_buf, hModbus->Rx_size, HAL_MAX_DELAY);
 	HAL_UARTEx_ReceiveToIdle_IT(hModbus->huart, hModbus->Rx_buf, MAX_SIZE);
 }
 

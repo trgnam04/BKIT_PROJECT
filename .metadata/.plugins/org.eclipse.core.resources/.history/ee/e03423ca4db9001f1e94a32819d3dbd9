@@ -1,0 +1,145 @@
+/*
+ * Modbus_Slave.c
+ *
+ *  Created on: Dec 5, 2024
+ *      Author: ASUS
+ */
+
+#include "Modbus_Slave.h"
+#include "lcd.h"
+
+Slave_Device BKIT01;
+
+
+void InitSlave(Slave_Device* hDev){
+	hDev->signal = IDLE;
+	hDev->subsignal.s = 0;
+	hDev->Address = SLAVE_ADDRESS;
+	memset(hDev->Register, 0, sizeof(hDev->Register));
+	Modbus_Init(&slave, &huart3);
+}
+
+void CommandParser_handler(Slave_Device* hDev){
+	switch(slave.Rx_buf[1]){
+	case READ_COIL:{
+		break;
+	}
+	case READ_DISCRETE_INPUT:{
+		break;
+	}
+	case READ_HOLDING_REGISTER:{
+		hDev->signal = READ_MULTIPLE_HOLDING_REGISTER_HANDLER;
+		break;
+	}
+	case READ_INPUT_REGISTER:{
+		break;
+	}
+	case WRITE_SINGLE_COIL:{
+		break;
+	}
+	case WRITE_SINGLE_HOLDING_REGISTER:{
+		break;
+	}
+	case WRITE_MULTIPLE_COIL:{
+		break;
+	}
+	case WRITE_MULTIPLE_HOLDING_REGISTER:{
+		hDev->signal = READ_MULTIPLE_HOLDING_REGISTER_HANDLER;
+		break;
+	}
+	}
+	return;
+}
+
+void splitFloat(float input, uint8_t *integerPart, uint8_t *decimalPart) {
+    // Lấy phần nguyên
+    *integerPart = (uint8_t)input;
+
+    // Lấy phần thập phân
+    float fractional = input - *integerPart; // Tính phần thập phân
+    *decimalPart = (uint8_t)(fractional * 100); // Chuyển thành số nguyên trong khoảng 0-99
+}
+
+void splitUint16(uint16_t input, uint8_t *higherByte, uint8_t *lowerByte) {
+    *higherByte = (input >> 8) & 0xFF; // Lấy 8 bit cao
+    *lowerByte = input & 0xFF;        // Lấy 8 bit thấp
+}
+
+
+void Read_multiple_holding_register_handler(Slave_Device* hDev){
+	uint16_t startReg = (uint16_t)(slave.Rx_buf[2]) << 8 | (uint16_t)(slave.Rx_buf[3]);
+	uint16_t numberOfReg = (uint16_t)(slave.Rx_buf[4]) << 8 | (uint16_t)(slave.Rx_buf[5]);
+	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], &hDev->Register[startReg], numberOfReg, 100);
+	return;
+}
+
+void Read_single_register_handler(Slave_Device* hDev){
+	uint8_t data[3];
+	data[0] = 3;
+	data[1] = hDev->Register[slave.Rx_buf[2]];
+	data[2] = hDev->Register[slave.Rx_buf[2] + 1];
+	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], data, 3, 100);
+	return;
+}
+
+static void ReadData(Slave_Device* hDev){
+	float tempCur = sensor_get_current();
+	uint16_t tempLt = sensor_get_light();
+	uint16_t tempPt =sensor_get_potentiometer();
+	float tempT = sensor_get_temperature();
+	float tempVol = sensor_get_voltage();
+
+	// Current
+	splitFloat(tempCur, &hDev->Register[CURRENT_REGISTER_ADDRESS], &hDev->Register[CURRENT_REGISTER_ADDRESS + 1]);
+	// Temperature
+	splitFloat(tempT, &hDev->Register[TEMPERATURE_REGISTER_ADDRESS], &hDev->Register[TEMPERATURE_REGISTER_ADDRESS + 1]);
+	// Voltage
+	splitFloat(tempVol, &hDev->Register[VOLTAGE_REGISTER_ADDRESS], &hDev->Register[VOLTAGE_REGISTER_ADDRESS + 1]);
+	// Light
+	splitUint16(tempLt, &hDev->Register[LIGHT_REGISTER_ADDRESS], &hDev->Register[LIGHT_REGISTER_ADDRESS + 1]);
+	// Potentiometer
+	splitUint16(tempPt, &hDev->Register[POTENTIOMETER_REGISTER_ADDRESS], &hDev->Register[POTENTIOMETER_REGISTER_ADDRESS + 1]);
+
+}
+
+void slave_behavior(Slave_Device* hDev){
+	switch(hDev->signal){
+	case IDLE:{
+		lcd_show_string(10, 10, "watting for cmd", RED, BLACK, 16, 0);
+		hDev->signal = WAITTING_FOR_CMD;
+		break;
+	}
+	case WAITTING_FOR_CMD:{
+		ReadData(hDev);
+//		HAL_UART_Transmit(&huart1, &hDev->Register, 10, 100);
+//		if(Receive_Flag){
+//			HAL_UART_Transmit(&huart1, (uint8_t*)"hehe", 4, 100);
+//		}else{
+//			HAL_UART_Transmit(&huart1, (uint8_t*)"0 hehe", 6, 100);
+//		}
+
+		if(Receive_Flag){
+			lcd_show_string(10, 10, "                      ", RED, BLACK, 16, 0);
+			lcd_show_string(10, 30, "valid cmd", RED, BLACK, 16, 0);
+			hDev->signal = COMMAND_PARSER;
+			Receive_Flag = 0;
+			break;
+		}
+		break;
+	}
+	case COMMAND_PARSER:{
+		CommandParser_handler(hDev);
+		break;
+	}
+	case READ_SINGLE_REGISTER_HANDLER:{
+		Read_single_register_handler(hDev);
+		hDev->signal = IDLE;
+		break;
+	}
+	case READ_MULTIPLE_HOLDING_REGISTER_HANDLER:{
+		Read_multiple_holding_register_handler(hDev);
+		hDev->signal = IDLE;
+		break;
+	}
+	}
+}
