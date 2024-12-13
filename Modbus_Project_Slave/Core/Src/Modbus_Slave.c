@@ -108,17 +108,19 @@ static void ReadData(Slave_Device* hDev){
 void slave_behavior(Slave_Device* hDev){
 	switch(hDev->signal){
 	case IDLE:{
+		lcd_show_string(10, 10, "                      ", RED, BLACK, 16, 0);
+		lcd_show_string(10, 10, "watting for cmd", RED, BLACK, 16, 0);
+		hDev->signal = WAITTING_FOR_CMD;
+		break;
+	}
+	case WAITTING_FOR_CMD:{
 		ReadData(hDev);
 		if(Receive_Flag ){
+			lcd_show_string(10, 10, "                      ", RED, BLACK, 16, 0);
+			lcd_show_string(10, 10, "valid cmd", RED, BLACK, 16, 0);
 			hDev->signal = COMMAND_PARSER;
-			lcd_show_string(10, 10, "             ", RED, BLACK, 16, 0);
-			lcd_show_string(10, 10, "valid command", RED, BLACK, 16, 0);
 			Receive_Flag = 0;
 			break;
-		}
-		else{
-			lcd_show_string(10, 10, "               ", RED, BLACK, 16, 0);
-			lcd_show_string(10, 10, "invalid command", RED, BLACK, 16, 0);
 		}
 		break;
 	}
@@ -128,10 +130,12 @@ void slave_behavior(Slave_Device* hDev){
 	}
 	case READ_SINGLE_REGISTER_HANDLER:{
 		Read_single_register_handler(hDev);
+		hDev->signal = WAITTING_FOR_CMD;
 		break;
 	}
 	case READ_MULTIPLE_HOLDING_REGISTER_HANDLER:{
 		Read_multiple_holding_register_handler(hDev);
+		hDev->signal = WAITTING_FOR_CMD;
 		break;
 	}
 	}
