@@ -16,6 +16,7 @@ void InitSlave(Slave_Device* hDev){
 	hDev->subsignal.s = 0;
 	hDev->Address = SLAVE_ADDRESS;
 	memset(hDev->Register, 0, sizeof(hDev->Register));
+	memset(hDev->RegisterCoil, 0, sizeof(hDev->RegisterCoil));
 	Modbus_Init(&slave, &huart3);
 }
 
@@ -38,6 +39,7 @@ void CommandParser_handler(Slave_Device* hDev){
 		break;
 	}
 	case WRITE_SINGLE_HOLDING_REGISTER:{
+		hDev->signal = WRITE_HOLDING_REGISTER_HANDLER;
 		break;
 	}
 	case WRITE_MULTIPLE_COIL:{
@@ -73,7 +75,7 @@ void Read_multiple_holding_register_handler(Slave_Device* hDev){
 	return;
 }
 
-void Read_single_register_handler(Slave_Device* hDev){
+void Read_holding_register_handler(Slave_Device* hDev){
 	uint8_t data[3];
 	data[0] = 3;
 	data[1] = hDev->Register[slave.Rx_buf[2]];
@@ -102,25 +104,28 @@ static void ReadData(Slave_Device* hDev){
 
 }
 
+void Write_holding_register_handler(Slave_Device* hDev){
+	HAL_UART_Transmit(&huart3, slave.Rx_buf, slave.Rx_size, 1000);
+	hDev->RegisterCoil[0] = slave.Rx_buf[4];
+	hDev->RegisterCoil[1] = slave.Rx_buf[5];
+	uint8_t CoilState = hDev->RegisterCoil[1];
+	HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin, CoilState & COIL_A);
+	HAL_GPIO_WritePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin, CoilState & COIL_B);
+	HAL_GPIO_WritePin(OUTPUT_X0_GPIO_Port, OUTPUT_X0_Pin, CoilState & COIL_C);
+	HAL_GPIO_WritePin(OUTPUT_X1_GPIO_Port, OUTPUT_X1_Pin, CoilState & COIL_D);
+	HAL_GPIO_WritePin(OUTPUT_X2_GPIO_Port, OUTPUT_X2_Pin, CoilState & COIL_E);
+	HAL_GPIO_WritePin(OUTPUT_X3_GPIO_Port, OUTPUT_X3_Pin, CoilState & COIL_F);
+}
+
 void slave_behavior(Slave_Device* hDev){
 	switch(hDev->signal){
 	case IDLE:{
-		lcd_show_string(10, 10, "watting for cmd", RED, BLACK, 16, 0);
 		hDev->signal = WAITTING_FOR_CMD;
 		break;
 	}
 	case WAITTING_FOR_CMD:{
 		ReadData(hDev);
-//		HAL_UART_Transmit(&huart1, &hDev->Register, 10, 100);
-//		if(Receive_Flag){
-//			HAL_UART_Transmit(&huart1, (uint8_t*)"hehe", 4, 100);
-//		}else{
-//			HAL_UART_Transmit(&huart1, (uint8_t*)"0 hehe", 6, 100);
-//		}
-
 		if(Receive_Flag){
-			lcd_show_string(10, 10, "                      ", RED, BLACK, 16, 0);
-			lcd_show_string(10, 30, "valid cmd", RED, BLACK, 16, 0);
 			hDev->signal = COMMAND_PARSER;
 			Receive_Flag = 0;
 			break;
@@ -131,13 +136,18 @@ void slave_behavior(Slave_Device* hDev){
 		CommandParser_handler(hDev);
 		break;
 	}
-	case READ_SINGLE_REGISTER_HANDLER:{
-		Read_single_register_handler(hDev);
+	case READ_HOLDING_REGISTER_HANDLER:{
+		Read_holding_register_handler(hDev);
 		hDev->signal = IDLE;
 		break;
 	}
 	case READ_MULTIPLE_HOLDING_REGISTER_HANDLER:{
 		Read_multiple_holding_register_handler(hDev);
+		hDev->signal = IDLE;
+		break;
+	}
+	case WRITE_HOLDING_REGISTER_HANDLER:{
+		Write_holding_register_handler(hDev);
 		hDev->signal = IDLE;
 		break;
 	}

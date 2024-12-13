@@ -21,13 +21,21 @@
 
 #define SLAVE_ADDRESS 0x01
 
+#define COIL_A	1
+#define COIL_B	2
+#define COIL_C	4
+#define COIL_D	8
+#define COIL_E	16
+#define COIL_F	32
+
 
 typedef enum{
 	IDLE,
 	WAITTING_FOR_CMD,
 	COMMAND_PARSER,
 	READ_MULTIPLE_HOLDING_REGISTER_HANDLER,
-	READ_SINGLE_REGISTER_HANDLER
+	READ_HOLDING_REGISTER_HANDLER,
+	WRITE_HOLDING_REGISTER_HANDLER
 } Slave_behavior;
 
 typedef struct{
@@ -38,6 +46,7 @@ typedef struct{
 	Slave_Subsignal subsignal;
 	Slave_behavior signal;
 	uint8_t Register[10];
+	uint8_t RegisterCoil[2];
 	uint8_t Address;
 
 } Slave_Device;
@@ -48,7 +57,8 @@ extern Slave_Device BKIT01;
 void InitSlave(Slave_Device* hDev);
 void CommandParser_handler(Slave_Device* hDev);
 void Read_multiple_holding_register_handler(Slave_Device* hDev);
-void Read_single_register_handler(Slave_Device* hDev);
+void Read_holding_register_handler(Slave_Device* hDev);
+void Write_holding_register_handler(Slave_Device* hDev);
 void slave_behavior(Slave_Device* hDev);
 
 

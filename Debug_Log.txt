@@ -1,0 +1,7 @@
+DEBUG LOG
+
+13/12/2024:
+	Vị trí callback sai -> thay đổi từ Modbus_Slave.c -> main.c
+	Các vị trí đặt việc writepin của chân enable còn lộn xộn
+	
+	

@@ -129,9 +129,6 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	InitSlave(&BKIT01);
-	slave.Tx_buf[0] = 1;
-	slave.Tx_size = 1;
-	Modbus_Send(&slave);
 	InitTimer();
 	lcd_clear(BLACK);
 	set_timer(10, 0);
@@ -150,7 +147,6 @@ int main(void)
 			set_timer(1000, 1);
 		}
 		if(timer_flag[2]){
-
 			set_timer(5000, 2);
 		}
 
