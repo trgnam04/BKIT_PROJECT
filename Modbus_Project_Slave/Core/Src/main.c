@@ -131,6 +131,7 @@ int main(void)
 	lcd_clear(BLACK);
 	set_timer(10, 0);
 	set_timer(1000, 1);
+	set_timer(10, 2);
 
 
 	while (1) {
@@ -143,6 +144,11 @@ int main(void)
 			HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);
 			set_timer(1000, 1);
 		}
+		if(timer_flag[2]){
+			lcd_show_string(10, 30, "                      ", RED, BLACK, 16, 0);
+			set_timer(10, 2);
+		}
+
 
     /* USER CODE END WHILE */
 
