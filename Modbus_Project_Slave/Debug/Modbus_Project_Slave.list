@@ -29,25 +29,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  12 .ARM.attributes 00000030  00000000  00000000  0000c20c  2**0
                   CONTENTS, READONLY
- 13 .debug_info   0001a899  00000000  00000000  0000c23c  2**0
+ 13 .debug_info   0001a8c4  00000000  00000000  0000c23c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 0000444c  00000000  00000000  00026ad5  2**0
+ 14 .debug_abbrev 0000446e  00000000  00000000  00026b00  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 00001720  00000000  00000000  0002af28  2**3
+ 15 .debug_aranges 00001728  00000000  00000000  0002af70  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_rnglists 000011ee  00000000  00000000  0002c648  2**0
+ 16 .debug_rnglists 000011f4  00000000  00000000  0002c698  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  00026333  00000000  00000000  0002d836  2**0
+ 17 .debug_macro  00026333  00000000  00000000  0002d88c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00020401  00000000  00000000  00053b69  2**0
+ 18 .debug_line   0002041f  00000000  00000000  00053bbf  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000dfebc  00000000  00000000  00073f6a  2**0
+ 19 .debug_str    000dfeca  00000000  00000000  00073fde  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  00153e26  2**0
+ 20 .comment      00000043  00000000  00000000  00153ea8  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  0000601c  00000000  00000000  00153e6c  2**2
+ 21 .debug_frame  00006038  00000000  00000000  00153eec  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 00000058  00000000  00000000  00159e88  2**0
+ 22 .debug_line_str 00000058  00000000  00000000  00159f24  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1151,7 +1151,6 @@ void splitFloat(float _input, uint8_t *data) {
  8000dc0:	af00      	add	r7, sp, #0
  8000dc2:	ed87 0a01 	vstr	s0, [r7, #4]
  8000dc6:	6038      	str	r0, [r7, #0]
-//	HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);
 	data[0] = *(((uint8_t*)&_input)+0);
  8000dc8:	1d3b      	adds	r3, r7, #4
  8000dca:	781a      	ldrb	r2, [r3, #0]
@@ -1173,7 +1172,6 @@ void splitFloat(float _input, uint8_t *data) {
  8000de4:	79fa      	ldrb	r2, [r7, #7]
  8000de6:	701a      	strb	r2, [r3, #0]
 //	memcpy(data, &_input, sizeof(float));
-//	HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);
 };
  8000de8:	bf00      	nop
  8000dea:	370c      	adds	r7, #12
@@ -1478,6 +1476,10 @@ void Write_holding_register_handler(Slave_Device* hDev){
  8001028:	40020800 	.word	0x40020800
 
 0800102c <slave_behavior>:
+		HAL_GPIO_WritePin(OUTPUT_X1_GPIO_Port, OUTPUT_X1_Pin, RESET);
+		HAL_GPIO_WritePin(OUTPUT_X2_GPIO_Port, OUTPUT_X2_Pin, RESET);
+		HAL_GPIO_WritePin(OUTPUT_X3_GPIO_Port, OUTPUT_X3_Pin, RESET);
+};
 
 void slave_behavior(Slave_Device* hDev){
  800102c:	b580      	push	{r7, lr}
@@ -4337,7 +4339,6 @@ int main(void)
 
 
 	while (1) {
-
 //		HAL_Delay(10);
 		if(timer_flag[0]){
  8002246:	4b0e      	ldr	r3, [pc, #56]	@ (8002280 <main+0x98>)
@@ -6499,9 +6500,9 @@ void MX_USART1_UART_Init(void)
  8002f60:	4b11      	ldr	r3, [pc, #68]	@ (8002fa8 <MX_USART1_UART_Init+0x4c>)
  8002f62:	4a12      	ldr	r2, [pc, #72]	@ (8002fac <MX_USART1_UART_Init+0x50>)
  8002f64:	601a      	str	r2, [r3, #0]
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
  8002f66:	4b10      	ldr	r3, [pc, #64]	@ (8002fa8 <MX_USART1_UART_Init+0x4c>)
- 8002f68:	f44f 32e1 	mov.w	r2, #115200	@ 0x1c200
+ 8002f68:	f44f 5216 	mov.w	r2, #9600	@ 0x2580
  8002f6c:	605a      	str	r2, [r3, #4]
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
  8002f6e:	4b0e      	ldr	r3, [pc, #56]	@ (8002fa8 <MX_USART1_UART_Init+0x4c>)
@@ -6564,9 +6565,9 @@ void MX_USART3_UART_Init(void)
  8002fb4:	4b11      	ldr	r3, [pc, #68]	@ (8002ffc <MX_USART3_UART_Init+0x4c>)
  8002fb6:	4a12      	ldr	r2, [pc, #72]	@ (8003000 <MX_USART3_UART_Init+0x50>)
  8002fb8:	601a      	str	r2, [r3, #0]
-  huart3.Init.BaudRate = 115200;
+  huart3.Init.BaudRate = 9600;
  8002fba:	4b10      	ldr	r3, [pc, #64]	@ (8002ffc <MX_USART3_UART_Init+0x4c>)
- 8002fbc:	f44f 32e1 	mov.w	r2, #115200	@ 0x1c200
+ 8002fbc:	f44f 5216 	mov.w	r2, #9600	@ 0x2580
  8002fc0:	605a      	str	r2, [r3, #4]
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
  8002fc2:	4b0e      	ldr	r3, [pc, #56]	@ (8002ffc <MX_USART3_UART_Init+0x4c>)
