@@ -92,28 +92,4 @@ void TimerRun(void){
 
 
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	if (htim->Instance == TIM2) {
-		TimerRun();
-		if (timer2_counter > 0) {
-			timer2_counter--;
-			if (timer2_counter == 0) {
-				timer2_flag = 1;
-				timer2_counter = timer2_mul;
-			}
-		}
-	}
-
-	if (htim->Instance == TIM4) {
-		if (timer4_counter > 0) {
-			timer4_counter--;
-			if (timer4_counter == 0) {
-				timer4_flag = 1;
-				timer4_counter = timer4_mul;
-			}
-		}
-
-		led_7seg_display();
-	}
-}
 

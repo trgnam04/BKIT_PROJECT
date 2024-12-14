@@ -16,7 +16,6 @@ void InitSlave(Slave_Device* hDev){
 	hDev->subsignal.s = 0;
 	hDev->Address = SLAVE_ADDRESS;
 	memset(hDev->Register, 0, sizeof(hDev->Register));
-	memset(hDev->RegisterCoil, 0, sizeof(hDev->RegisterCoil));
 	Modbus_Init(&slave, &huart3);
 }
 
@@ -53,14 +52,13 @@ void CommandParser_handler(Slave_Device* hDev){
 	return;
 }
 
-void splitFloat(float input, uint8_t *integerPart, uint8_t *decimalPart) {
-    // Lấy phần nguyên
-    *integerPart = (uint8_t)input;
-
-    // Lấy phần thập phân
-    float fractional = input - *integerPart; // Tính phần thập phân
-    *decimalPart = (uint8_t)(fractional * 100); // Chuyển thành số nguyên trong khoảng 0-99
-}
+void splitFloat(float _input, uint8_t *data) {
+	data[0] = *(((uint8_t*)&_input)+0);
+	    data[1] = *(((uint8_t*)&_input)+1);
+	    data[2] = *(((uint8_t*)&_input)+2);
+	    data[3] = *(((uint8_t*)&_input)+3);
+//	memcpy(data, &_input, sizeof(float));
+};
 
 void splitUint16(uint16_t input, uint8_t *higherByte, uint8_t *lowerByte) {
     *higherByte = (input >> 8) & 0xFF; // Lấy 8 bit cao
@@ -92,11 +90,11 @@ static void ReadData(Slave_Device* hDev){
 	float tempVol = sensor_get_voltage();
 
 	// Current
-	splitFloat(tempCur, &hDev->Register[CURRENT_REGISTER_ADDRESS], &hDev->Register[CURRENT_REGISTER_ADDRESS + 1]);
+	splitFloat(tempCur, &hDev->Register[CURRENT_REGISTER_ADDRESS]);
 	// Temperature
-	splitFloat(tempT, &hDev->Register[TEMPERATURE_REGISTER_ADDRESS], &hDev->Register[TEMPERATURE_REGISTER_ADDRESS + 1]);
+	splitFloat(tempT, &hDev->Register[TEMPERATURE_REGISTER_ADDRESS]);
 	// Voltage
-	splitFloat(tempVol, &hDev->Register[VOLTAGE_REGISTER_ADDRESS], &hDev->Register[VOLTAGE_REGISTER_ADDRESS + 1]);
+	splitFloat(tempVol, &hDev->Register[VOLTAGE_REGISTER_ADDRESS]);
 	// Light
 	splitUint16(tempLt, &hDev->Register[LIGHT_REGISTER_ADDRESS], &hDev->Register[LIGHT_REGISTER_ADDRESS + 1]);
 	// Potentiometer
@@ -106,9 +104,9 @@ static void ReadData(Slave_Device* hDev){
 
 void Write_holding_register_handler(Slave_Device* hDev){
 	HAL_UART_Transmit(&huart3, slave.Rx_buf, slave.Rx_size, 1000);
-	hDev->RegisterCoil[0] = slave.Rx_buf[4];
-	hDev->RegisterCoil[1] = slave.Rx_buf[5];
-	uint8_t CoilState = hDev->RegisterCoil[1];
+	hDev->Register[LED_REGISTER_ADDRESS] = slave.Rx_buf[4];
+	hDev->Register[LED_REGISTER_ADDRESS + 1] = slave.Rx_buf[5];
+	uint8_t CoilState = hDev->Register[LED_REGISTER_ADDRESS + 1];
 	HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin, CoilState & COIL_A);
 	HAL_GPIO_WritePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin, CoilState & COIL_B);
 	HAL_GPIO_WritePin(OUTPUT_X0_GPIO_Port, OUTPUT_X0_Pin, CoilState & COIL_C);
@@ -116,6 +114,15 @@ void Write_holding_register_handler(Slave_Device* hDev){
 	HAL_GPIO_WritePin(OUTPUT_X2_GPIO_Port, OUTPUT_X2_Pin, CoilState & COIL_E);
 	HAL_GPIO_WritePin(OUTPUT_X3_GPIO_Port, OUTPUT_X3_Pin, CoilState & COIL_F);
 }
+
+void TurnOffAllLed(void){
+	HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin, RESET);
+		HAL_GPIO_WritePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin, RESET);
+		HAL_GPIO_WritePin(OUTPUT_X0_GPIO_Port, OUTPUT_X0_Pin, RESET);
+		HAL_GPIO_WritePin(OUTPUT_X1_GPIO_Port, OUTPUT_X1_Pin, RESET);
+		HAL_GPIO_WritePin(OUTPUT_X2_GPIO_Port, OUTPUT_X2_Pin, RESET);
+		HAL_GPIO_WritePin(OUTPUT_X3_GPIO_Port, OUTPUT_X3_Pin, RESET);
+};
 
 void slave_behavior(Slave_Device* hDev){
 	switch(hDev->signal){

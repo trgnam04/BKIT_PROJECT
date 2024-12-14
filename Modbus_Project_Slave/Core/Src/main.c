@@ -81,6 +81,13 @@ void TestADC();
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 	Modbus_CallBack(&slave, huart, Size);
 }
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM2) {
+		TimerRun();
+	}
+
+}
+
 
 /* USER CODE END 0 */
 
@@ -133,10 +140,10 @@ int main(void)
 	lcd_clear(BLACK);
 	set_timer(10, 0);
 	set_timer(1000, 1);
-	set_timer(5000, 2);
 
 
 	while (1) {
+//		HAL_Delay(10);
 		if(timer_flag[0]){
 			slave_behavior(&BKIT01);
 			TestADC();
@@ -145,9 +152,6 @@ int main(void)
 		if(timer_flag[1]){
 			HAL_GPIO_TogglePin(DEBUG_LED_GPIO_Port, DEBUG_LED_Pin);
 			set_timer(1000, 1);
-		}
-		if(timer_flag[2]){
-			set_timer(5000, 2);
 		}
 
 
@@ -213,7 +217,6 @@ void system_init() {
 	buzzer_init();
 
 	timer2_init();
-	timer2_set(500);
 }
 
 uint8_t IsButtonUp() {

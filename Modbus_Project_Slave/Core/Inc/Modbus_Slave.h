@@ -10,16 +10,17 @@
 
 #include "main.h"
 #include "rs485.h"
-#include "string.h"
+#include <string.h>
 #include "sensor.h"
 
-#define TEMPERATURE_REGISTER_ADDRESS 0
-#define LIGHT_REGISTER_ADDRESS 2
-#define CURRENT_REGISTER_ADDRESS 4
-#define VOLTAGE_REGISTER_ADDRESS 6
-#define POTENTIOMETER_REGISTER_ADDRESS 8
+#define POTENTIOMETER_REGISTER_ADDRESS 0
+#define LED_REGISTER_ADDRESS 2
+#define LIGHT_REGISTER_ADDRESS 4
+#define TEMPERATURE_REGISTER_ADDRESS 6
+#define CURRENT_REGISTER_ADDRESS 10
+#define VOLTAGE_REGISTER_ADDRESS 14
 
-#define SLAVE_ADDRESS 0x01
+#define SLAVE_ADDRESS 0x02
 
 #define COIL_A	1
 #define COIL_B	2
@@ -45,8 +46,7 @@ typedef struct{
 typedef struct{
 	Slave_Subsignal subsignal;
 	Slave_behavior signal;
-	uint8_t Register[10];
-	uint8_t RegisterCoil[2];
+	uint8_t Register[20];
 	uint8_t Address;
 
 } Slave_Device;
@@ -60,7 +60,7 @@ void Read_multiple_holding_register_handler(Slave_Device* hDev);
 void Read_holding_register_handler(Slave_Device* hDev);
 void Write_holding_register_handler(Slave_Device* hDev);
 void slave_behavior(Slave_Device* hDev);
-
+void TurnOffAllLed(void);
 
 #endif /* INC_MODBUS_SLAVE_H_ */
 
