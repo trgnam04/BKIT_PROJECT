@@ -10,4 +10,5 @@
    + Temperature register address: 0x06
    + Current register address: 0x0A
    + Voltage register address: 0x0E
+## Default baudrate 9600
    
