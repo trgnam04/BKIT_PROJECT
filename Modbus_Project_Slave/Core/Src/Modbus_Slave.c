@@ -109,19 +109,11 @@ void Write_holding_register_handler(Slave_Device* hDev){
 	uint8_t CoilState = hDev->Register[LED_REGISTER_ADDRESS + 1];
 	HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin, CoilState & COIL_A);
 	HAL_GPIO_WritePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin, CoilState & COIL_B);
-	HAL_GPIO_WritePin(OUTPUT_X0_GPIO_Port, OUTPUT_X0_Pin, CoilState & COIL_C);
-	HAL_GPIO_WritePin(OUTPUT_X1_GPIO_Port, OUTPUT_X1_Pin, CoilState & COIL_D);
-	HAL_GPIO_WritePin(OUTPUT_X2_GPIO_Port, OUTPUT_X2_Pin, CoilState & COIL_E);
-	HAL_GPIO_WritePin(OUTPUT_X3_GPIO_Port, OUTPUT_X3_Pin, CoilState & COIL_F);
 }
 
 void TurnOffAllLed(void){
-	HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin, RESET);
-		HAL_GPIO_WritePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin, RESET);
-		HAL_GPIO_WritePin(OUTPUT_X0_GPIO_Port, OUTPUT_X0_Pin, RESET);
-		HAL_GPIO_WritePin(OUTPUT_X1_GPIO_Port, OUTPUT_X1_Pin, RESET);
-		HAL_GPIO_WritePin(OUTPUT_X2_GPIO_Port, OUTPUT_X2_Pin, RESET);
-		HAL_GPIO_WritePin(OUTPUT_X3_GPIO_Port, OUTPUT_X3_Pin, RESET);
+	HAL_GPIO_WritePin(OUTPUT_Y0_GPIO_Port, OUTPUT_Y0_Pin, SET);
+	HAL_GPIO_WritePin(OUTPUT_Y1_GPIO_Port, OUTPUT_Y1_Pin, SET);
 };
 
 void slave_behavior(Slave_Device* hDev){
@@ -133,7 +125,11 @@ void slave_behavior(Slave_Device* hDev){
 	case WAITTING_FOR_CMD:{
 		ReadData(hDev);
 		if(Receive_Flag){
-			hDev->signal = COMMAND_PARSER;
+			if(slave.Rx_buf[0] == hDev->Address){
+				hDev->signal = COMMAND_PARSER;
+			}else{
+				hDev->signal = IDLE;
+			}
 			Receive_Flag = 0;
 			break;
 		}

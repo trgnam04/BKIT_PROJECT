@@ -135,8 +135,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	InitSlave(&BKIT01);
-	InitTimer();
+
+	TurnOffAllLed();
 	lcd_clear(BLACK);
 	set_timer(10, 0);
 	set_timer(1000, 1);
@@ -217,6 +217,9 @@ void system_init() {
 	buzzer_init();
 
 	timer2_init();
+
+	InitSlave(&BKIT01);
+	InitTimer();
 }
 
 uint8_t IsButtonUp() {
