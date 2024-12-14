@@ -27,9 +27,12 @@ uint8_t transmit_flag = 0;
 
 void rs485_send_cmd(uint8_t* cmd_without_crc, uint8_t cmd_size_without_crc)
 {
-	if (sizeof(cmd_without_crc) > 254) return;
+	if (cmd_size_without_crc > 254) return;
 
-	sprintf((void*)transmit_buffer,"%s",cmd_without_crc);
+	for(int i = 0; i < cmd_size_without_crc; i++){
+		transmit_buffer[i] = cmd_without_crc[i];
+	}
+//	sprintf((void*)transmit_buffer, "%s", cmd_without_crc);
 	transmit_size = cmd_size_without_crc;
 
 	uint16_t crc = crc16(transmit_buffer, transmit_size);
@@ -136,7 +139,9 @@ void rs485_fsm()
 
 			if (is_transmit()) // CHANGE STATE -> RS485_TRANSMIT
 			{
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, SET);
 				HAL_UART_Transmit(&huart3, transmit_buffer, transmit_size, HAL_MAX_DELAY);
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, RESET);
 				init_rs485_transmit();
 				MODBUS485_STATE = RS485_TRANSMIT;
 			}
