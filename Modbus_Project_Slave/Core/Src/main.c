@@ -78,11 +78,13 @@ void TestADC();
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
-	Modbus_CallBack(&slave, huart, Size);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	RS485_UART_Callback(huart);
 }
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM2) {
+
 		TimerRun();
 	}
 

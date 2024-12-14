@@ -1,9 +1,10 @@
 ../Core/Src/Modbus_Slave.c:14:6:InitSlave	16	static
 ../Core/Src/Modbus_Slave.c:22:6:CommandParser_handler	16	static
 ../Core/Src/Modbus_Slave.c:55:6:splitFloat	16	static
-../Core/Src/Modbus_Slave.c:65:6:splitUint16	24	static
-../Core/Src/Modbus_Slave.c:71:6:Read_multiple_holding_register_handler	40	static
-../Core/Src/Modbus_Slave.c:78:6:Read_holding_register_handler	32	static
-../Core/Src/Modbus_Slave.c:87:13:ReadData	32	static
-../Core/Src/Modbus_Slave.c:107:6:Write_holding_register_handler	24	static
-../Core/Src/Modbus_Slave.c:120:6:slave_behavior	16	static
+../Core/Src/Modbus_Slave.c:63:6:splitUint16	24	static
+../Core/Src/Modbus_Slave.c:69:6:Read_multiple_holding_register_handler	24	static
+../Core/Src/Modbus_Slave.c:87:6:Read_holding_register_handler	16	static
+../Core/Src/Modbus_Slave.c:104:13:ReadData	32	static
+../Core/Src/Modbus_Slave.c:124:6:Write_holding_register_handler	24	static
+../Core/Src/Modbus_Slave.c:139:6:TurnOffAllLed	8	static
+../Core/Src/Modbus_Slave.c:148:6:slave_behavior	16	static

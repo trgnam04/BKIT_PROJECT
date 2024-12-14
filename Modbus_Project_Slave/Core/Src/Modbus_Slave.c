@@ -6,7 +6,7 @@
  */
 
 #include "Modbus_Slave.h"
-#include "lcd.h"
+
 
 Slave_Device BKIT01;
 
@@ -28,7 +28,7 @@ void CommandParser_handler(Slave_Device* hDev){
 		break;
 	}
 	case READ_HOLDING_REGISTER:{
-		hDev->signal = READ_MULTIPLE_HOLDING_REGISTER_HANDLER;
+		hDev->signal = READ_HOLDING_REGISTER_HANDLER;
 		break;
 	}
 	case READ_INPUT_REGISTER:{
@@ -69,17 +69,36 @@ void splitUint16(uint16_t input, uint8_t *higherByte, uint8_t *lowerByte) {
 void Read_multiple_holding_register_handler(Slave_Device* hDev){
 	uint16_t startReg = (uint16_t)(slave.Rx_buf[2]) << 8 | (uint16_t)(slave.Rx_buf[3]);
 	uint16_t numberOfReg = (uint16_t)(slave.Rx_buf[4]) << 8 | (uint16_t)(slave.Rx_buf[5]);
-	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], &hDev->Register[startReg], numberOfReg * 2, 100);
+	slave.Tx_buf[0] = hDev->Address;
+	slave.Tx_buf[1] = slave.Rx_buf[1];
+	slave.Tx_buf[2] = numberOfReg * 2;
+	int i;
+	for(i = 0; i < numberOfReg * 2; i++){
+		slave.Tx_buf[i + 3] = hDev->Register[startReg];
+	}
+	slave.Tx_size = i + 3;
+	rs485_send_cmd(slave.Tx_buf, slave.Tx_size);
+
+//	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], &hDev->Register[startReg], numberOfReg * 2, 100);
+
 	return;
 }
 
 void Read_holding_register_handler(Slave_Device* hDev){
-	uint8_t data[3];
-	data[0] = 3;
-	data[1] = hDev->Register[slave.Rx_buf[2]];
-	data[2] = hDev->Register[slave.Rx_buf[2] + 1];
-	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], data, 3, 100);
-	return;
+//	uint8_t data[3];
+//	data[0] = 3;
+//	data[1] = hDev->Register[slave.Rx_buf[2]];
+//	data[2] = hDev->Register[slave.Rx_buf[2] + 1];
+//	slave.Tx_buf[0] = hDev->Address;
+//	slave.Tx_buf[1] = slave.Rx_buf[1];
+//	slave.Tx_buf[2] = 3;
+//	int i;
+//	for(i = 0; i < numberOfReg * 2; i++){
+//		slave.Tx_buf[i + 3] = hDev->Register[startReg];
+//	}
+//	slave.Tx_size = i + 3;
+//	Modbus_Transmit_Slave(&slave, hDev->Address, slave.Rx_buf[1], data, 3, 100);
+//	return;
 }
 
 static void ReadData(Slave_Device* hDev){
@@ -103,7 +122,9 @@ static void ReadData(Slave_Device* hDev){
 }
 
 void Write_holding_register_handler(Slave_Device* hDev){
-	HAL_UART_Transmit(&huart3, slave.Rx_buf, slave.Rx_size, 1000);
+
+//	HAL_UART_Transmit(&huart3, slave.Rx_buf, slave.Rx_size, 1000);
+	rs485_send_cmd(slave.Rx_buf, slave.Rx_size);
 	hDev->Register[LED_REGISTER_ADDRESS] = slave.Rx_buf[4];
 	hDev->Register[LED_REGISTER_ADDRESS + 1] = slave.Rx_buf[5];
 	uint8_t CoilState = hDev->Register[LED_REGISTER_ADDRESS + 1];

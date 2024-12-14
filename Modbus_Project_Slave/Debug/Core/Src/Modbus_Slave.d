@@ -36,8 +36,9 @@ Core/Src/Modbus_Slave.o: ../Core/Src/Modbus_Slave.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/rs485.h ../Core/Inc/crc16.h ../Core/Inc/sensor.h \
- ../Core/Inc/lcd.h ../Core/Inc/gpio.h
+ ../Core/Inc/lcd.h ../Core/Inc/gpio.h ../Core/Inc/modbus485_fsm.h \
+ ../Core/Inc/usart.h ../Core/Inc/software_timer.h ../Core/Inc/crc16.h \
+ ../Core/Inc/rs485.h ../Core/Inc/sensor.h
 ../Core/Inc/Modbus_Slave.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -76,8 +77,11 @@ Core/Src/Modbus_Slave.o: ../Core/Src/Modbus_Slave.c \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-../Core/Inc/rs485.h:
-../Core/Inc/crc16.h:
-../Core/Inc/sensor.h:
 ../Core/Inc/lcd.h:
 ../Core/Inc/gpio.h:
+../Core/Inc/modbus485_fsm.h:
+../Core/Inc/usart.h:
+../Core/Inc/software_timer.h:
+../Core/Inc/crc16.h:
+../Core/Inc/rs485.h:
+../Core/Inc/sensor.h:

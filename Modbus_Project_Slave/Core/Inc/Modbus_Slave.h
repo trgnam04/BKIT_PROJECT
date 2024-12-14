@@ -9,6 +9,8 @@
 #define INC_MODBUS_SLAVE_H_
 
 #include "main.h"
+#include "lcd.h"
+#include "modbus485_fsm.h"
 #include "rs485.h"
 #include <string.h>
 #include "sensor.h"
